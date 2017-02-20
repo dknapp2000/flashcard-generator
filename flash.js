@@ -1,7 +1,8 @@
 var inquirer = require( "inquirer" );
 var question = require("./card_data.js" );
 var cards = [];
-// const limit = 2;  // for testing
+var longAnswer = true;    // By Changing this to false you get the short answer version, true = the cloze (long) answer version.
+const limit = 2;  // for testing
 var score = {
     rounds: 0,
     questionsAsked: 0,
@@ -21,13 +22,24 @@ function BasicFlashCard( question ) {
         let end = string.indexOf("}}") + 2;   // end of answer string 
         questionMod = string.slice(0,start) + " ... " + string.slice(end);  // Replace with an elipsis
         answer = string.slice(start+2,end-2);     // get the answer value without the squiggles
-        return { front: questionMod, back: answer };  // Return both parts in an object
+        answer = answer.trim();
+        fullAnswer = string.slice(0,start) + answer  + string.slice(end);     // Produce the "full answer" version
+        return { front: questionMod, back: answer, fullAnswer: fullAnswer };  // Return both parts in an object
     }
     this.side = this.extractAnswer( this.question );
     this.dump = function() {          // Utility object debugging function for self-dump 
         for ( var prop in this ) {
             console.log( prop + " = ", this[prop] );
         }
+    }
+}
+
+function SimpleCard( question, answer ) {
+    this.question = question;
+    this.answer = answer;
+    this.createFlashCards = function( question, answer ) {
+        this.front = this.question;
+        this.back = this.answer;
     }
 }
 
@@ -40,23 +52,22 @@ question.cardList.forEach( c => {
 
 savedCards = cards.slice(0);
 
-console.log( savedCards );
-
-console.log( "Begin flash cards. (count=" + cards.length + ")" );
-
 function nextCard() { 
     var card = cards.pop();    // Pop a card off the stack
     prompt.message = card.side.front;  // move the card message to the inquirer prompt 
     score.questionsAsked++;
+    console.log( "-----------------" );
     inquirer.prompt( prompt )
     .then( function( answer ) {
-        console.log( answer );
         if ( answer.response.trim().toLowerCase() === card.side.back.trim().toLowerCase() ) {
             score.correct++;
             console.log( "That's right!  Great job." );
         } else {
             console.log( `Sorry, the correct answer is ${card.side.back}.`);
             score.inCorrect++;
+        }
+        if ( longAnswer ) {
+            console.log( `Full answer: ${card.side.fullAnswer}` );
         }
         checkStatus( score ) ;
     });
@@ -92,6 +103,34 @@ function checkStatus( score ) {
         nextCard();
     }
 }
+console.log( "-------------------------------------------------------------------------" );
+console.log( "This game may be played as a flash card emulator that presents" );
+console.log( "a question and receives and answer.  If the answer is correct, then" );
+console.log( "the player is congratulated and the next card is displayed.  If the" );
+console.log( "answer is wrong the the player is shown the correct answer and we move" );
+console.log( "on to the next question." );
+console.log( "Your other option is the 'Long answer' version that shows the question" );
+console.log( "and after telling the player if he is correct or not, displays the" );
+console.log( "complete text of the correct answer." );
+console.log( "-------------------------------------------------------------------------" );
+console.log( "Begin flash cards. (count=" + cards.length + ")" );
 
-nextCard();
+typePrompt = {
+    name: "gameType",
+    message: "Whick type of game would you like to play ",
+    type: "list",
+    choices: [ "Emulator", "Long answer" ]
+}
+
+inquirer.prompt( typePrompt )
+.then( function(resp) {
+    console.log( resp );
+    if ( resp.gameType === "Long answer" ) {
+        longAnswer = true;
+    } else {
+        longAnswer = false;
+    }
+    nextCard();
+})
+
 
