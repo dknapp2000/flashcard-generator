@@ -2,7 +2,7 @@ var inquirer = require( "inquirer" );
 var question = require("./card_data.js" );
 var cards = [];
 var longAnswer = true;    // By Changing this to false you get the short answer version, true = the cloze (long) answer version.
-const limit = 2;  // for testing
+const limit = 10;  // for testing
 var score = {
     rounds: 0,
     questionsAsked: 0,
