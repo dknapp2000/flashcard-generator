@@ -22,14 +22,14 @@ var prompt = {          // This is an empty prompt template.  We'll update the v
  */
 function BasicFlashCard( question ) {
     this.question = question;
-    this.extractAnswer = function( string ) { // Extract the answer string from the question
-        let start = string.indexOf("{{");     // Start of answer string
-        let end = string.indexOf("}}") + 2;   // end of answer string 
+    this.extractAnswer = function( string ) {         // Extract the answer string from the question
+        let start = string.indexOf("{{");             // Start of answer string
+        let end = string.indexOf("}}") + 2;           // end of answer string 
         let questionMod = string.slice(0,start) + " ... " + string.slice(end);  // Replace with an elipsis
         let answer = string.slice(start+2,end-2);     // get the answer value without the squiggles
         answer = answer.trim();
         let fullAnswer = string.slice(0,start) + answer  + string.slice(end);     // Produce the "full answer" version
-        return { front: questionMod, back: answer, fullAnswer: fullAnswer };  // Return both parts in an object
+        return { front: questionMod, back: answer, fullAnswer: fullAnswer };      // Return both parts in an object
     }
     this.side = this.extractAnswer( this.question );
     this.dump = function() {          // Utility object debugging function for self-dump 
